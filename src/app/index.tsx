@@ -1,8 +1,17 @@
+import CreateGroupButton from "@/components/CreateGroupButton";
+import InviteCodeButton from "@/components/InviteCodeButton";
+import JoinGroupButton from "@/components/JoinGroupButton";
+import LoadingScreen from "@/components/LoadingScreen";
+import NicknameForm from "@/components/NicknameForm";
 import OcrScanButton, { OcrResult } from "@/components/OCR-ScanButton";
+import { useUserProfile } from "@/hooks/use-user-profile";
 import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
+
 export default function HomeScreen() {
+  const { loading, userId, nickname, saveNickname } = useUserProfile();
+
   const [ocrResult, setOcrResult] = useState<OcrResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -11,15 +20,26 @@ export default function HomeScreen() {
     setOcrResult(result);
   };
 
+  if (loading) {
+    return <LoadingScreen message="Inicjalizacja tożsamości..." />;
+  }
+
+  if (!nickname) {
+    return <NicknameForm onSave={saveNickname} />;
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>📄 Skaner paragonów</Text>
+      <Text style={styles.title}>👋 Cześć, {nickname}!</Text>
+      <Text style={styles.subtitle}>Twoje ID: {userId?.slice(0, 8)}...</Text>
 
       <OcrScanButton
         onResult={handleOcrResult}
         onError={(err: Error) => setError(err.message)}
       />
-
+      <CreateGroupButton />
+      <JoinGroupButton />
+      <InviteCodeButton />
       {error && (
         <View style={styles.errorBox}>
           <Text style={styles.errorText}>❌ Błąd: {error}</Text>
@@ -42,11 +62,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 24,
-    gap: 20,
+    gap: 16,
   },
   title: {
     fontSize: 22,
     fontWeight: "700",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 8,
   },
   errorBox: {
     backgroundColor: "#fdecea",
@@ -60,7 +86,7 @@ const styles = StyleSheet.create({
   },
   resultBox: {
     width: "100%",
-    maxHeight: 320,
+    maxHeight: 280,
     backgroundColor: "#f4f4f4",
     borderRadius: 8,
     padding: 12,
