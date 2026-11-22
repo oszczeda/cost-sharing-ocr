@@ -1,4 +1,10 @@
+import CreateGroupButton from "@/components/CreateGroupButton";
+import InviteCodeButton from "@/components/InviteCodeButton";
+import JoinGroupButton from "@/components/JoinGroupButton";
+import LoadingScreen from "@/components/LoadingScreen";
+import NicknameForm from "@/components/NicknameForm";
 import OcrScanButton, { OcrResult } from "@/components/OCR-ScanButton";
+import { useUserProfile } from "@/hooks/use-user-profile";
 import { parseReceiptExpense, ParsedExpense } from "@/utils/receipt-parser";
 import { useState } from "react";
 import {
@@ -15,6 +21,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
+  const { loading, userId, nickname, saveNickname } = useUserProfile();
+
   // Stan formularza wydatku
   const [expenseAmount, setExpenseAmount] = useState<string>("");
   const [expenseTitle, setExpenseTitle] = useState<string>("Zakupy - paragon");
@@ -36,7 +44,7 @@ export default function HomeScreen() {
     setOcrResult(result);
     setParsedExpense(result.parsedExpense);
 
-    if (result.parsedExpense.found && result.parsedExpense.rawAmount) {
+    if (result.parsedExpense?.found && result.parsedExpense.rawAmount) {
       setExpenseAmount(result.parsedExpense.rawAmount);
     } else {
       // Nie zgadujemy na siłę — pole kwoty pozostaje do wprowadzenia przez użytkownika
@@ -63,6 +71,14 @@ export default function HomeScreen() {
     setError(null);
   };
 
+  if (loading) {
+    return <LoadingScreen message="Inicjalizacja tożsamości..." />;
+  }
+
+  if (!nickname) {
+    return <NicknameForm onSave={saveNickname} />;
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -73,14 +89,32 @@ export default function HomeScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.screenHeader}>🧾 Podział Kosztów z OCR</Text>
+          {/* ============================================================== */}
+          {/* PROFIL UŻYTKOWNIKA                                             */}
+          {/* ============================================================== */}
+          <View style={styles.userProfileCard}>
+            <Text style={styles.greetingTitle}>👋 Cześć, {nickname}!</Text>
+            <Text style={styles.subtitle}>Twoje ID: {userId?.slice(0, 8)}...</Text>
+          </View>
+
+          {/* ============================================================== */}
+          {/* ZARZĄDZANIE GRUPAMI                                            */}
+          {/* ============================================================== */}
+          <View style={styles.groupsCard}>
+            <Text style={styles.sectionHeader}>👥 Grupy i rozliczenia</Text>
+            <View style={styles.groupButtonsWrapper}>
+              <CreateGroupButton />
+              <JoinGroupButton />
+              <InviteCodeButton />
+            </View>
+          </View>
 
           {/* ============================================================== */}
           {/* OKNO: Wydatek                                                  */}
           {/* ============================================================== */}
           <View style={styles.expenseWindow}>
             <View style={styles.windowHeaderRow}>
-              <Text style={styles.windowTitle}>Wydatek:</Text>
+              <Text style={styles.windowTitle}>🧾 Nowy wydatek:</Text>
               {parsedExpense?.found && (
                 <View style={styles.autoDetectedBadge}>
                   <Text style={styles.autoDetectedBadgeText}>✨ OCR Wykryto</Text>
@@ -241,12 +275,44 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
   },
-  screenHeader: {
-    fontSize: 22,
-    fontWeight: "800",
+
+  /* Profil użytkownika */
+  userProfileCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 14,
+    padding: 16,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#e8e9f1",
+  },
+  greetingTitle: {
+    fontSize: 20,
+    fontWeight: "700",
     color: "#1a1a24",
+  },
+  subtitle: {
+    fontSize: 13,
+    color: "#666",
     textAlign: "center",
-    marginVertical: 4,
+    marginTop: 4,
+  },
+
+  /* Zarządzanie grupami */
+  groupsCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#e8e9f1",
+    gap: 12,
+  },
+  sectionHeader: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1a1a24",
+  },
+  groupButtonsWrapper: {
+    gap: 10,
   },
 
   /* Okno Wydatek */

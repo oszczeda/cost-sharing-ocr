@@ -44,7 +44,8 @@
         {
           "photosPermission": "Aplikacja potrzebuje dostępu do galerii aby wybrać zdjęcie paragonu."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,

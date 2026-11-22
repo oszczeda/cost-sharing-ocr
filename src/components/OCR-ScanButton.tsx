@@ -32,7 +32,6 @@ type Props = {
   onError?: (error: Error) => void;
 };
 
-// base64 dostajemy bezpośrednio z kamery/galerii — bez FileSystem
 async function runOcr(base64: string): Promise<OcrResult> {
   const body = {
     requests: [
@@ -74,8 +73,7 @@ async function runOcr(base64: string): Promise<OcrResult> {
   const blocks: string[] =
     response0?.fullTextAnnotation?.pages
       ?.flatMap((p: any) => p.blocks)
-      ?.map(
-        (b: any) =>
+      ?.map((b: any) =>
           b.paragraphs
             ?.flatMap((par: any) => par.words)
             ?.map((w: any) => w.symbols?.map((s: any) => s.text).join(""))
@@ -117,7 +115,7 @@ export default function OcrScanButton({ onResult, onError }: Props) {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       quality: 0.8,
-      base64: true, // ← base64 bezpośrednio, bez FileSystem
+      base64: true,
     });
 
     if (!result.canceled && result.assets[0]?.base64) {
@@ -140,7 +138,7 @@ export default function OcrScanButton({ onResult, onError }: Props) {
     if (!cameraRef.current) return;
     const photo = await cameraRef.current.takePictureAsync({
       quality: 0.8,
-      base64: true, // ← base64 bezpośrednio, bez FileSystem
+      base64: true,
     });
     setShowCamera(false);
     if (photo?.base64) {
