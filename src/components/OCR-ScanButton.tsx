@@ -1,14 +1,19 @@
+import {
+  parseReceiptExpense,
+  ParsedExpense,
+  TextAnnotationItem,
+} from "@/utils/receipt-parser";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import { useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 const GOOGLE_CLOUD_VISION_API_KEY = process.env.EXPO_PUBLIC_VISION_API_KEY ?? "";
@@ -17,7 +22,9 @@ const VISION_API_URL = `https://vision.googleapis.com/v1/images:annotate?key=${G
 export type OcrResult = {
   rawText: string;
   blocks: string[];
+  textAnnotations: TextAnnotationItem[];
   rawResponse: object;
+  parsedExpense: ParsedExpense;
 };
 
 type Props = {
@@ -75,7 +82,18 @@ async function runOcr(base64: string): Promise<OcrResult> {
             ?.join(" ") ?? ""
       ) ?? [];
 
-  return { rawText, blocks, rawResponse: json };
+  const textAnnotations: TextAnnotationItem[] = response0?.textAnnotations ?? [];
+
+  // Wykrywanie wiersza PLN <kwota> wyłącznie w oparciu o linie z OCR
+  const parsedExpense = parseReceiptExpense(response0 ?? json);
+
+  return {
+    rawText,
+    blocks,
+    textAnnotations,
+    rawResponse: json,
+    parsedExpense,
+  };
 }
 
 export default function OcrScanButton({ onResult, onError }: Props) {

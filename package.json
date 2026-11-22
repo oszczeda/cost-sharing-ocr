@@ -31,7 +31,9 @@
     "react-native-worklets": "0.13.0"
   },
   "devDependencies": {
+    "@types/node": "^26.6.6",
     "@types/react": "~19.3.0",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -40,7 +42,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "ocr:capture": "tsx scripts/capture-ocr.ts",
+    "test:receipts": "tsx scripts/run-benchmark.ts"
   },
   "private": true
 }

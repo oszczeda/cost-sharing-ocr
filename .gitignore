@@ -44,3 +44,8 @@ example
 
 # klucze API
 .env
+
+# Zdjęcia paragonów do testów (lokalne)
+receipts_input/*
+!receipts_input/.gitkeep
+!receipts_input/README.md
