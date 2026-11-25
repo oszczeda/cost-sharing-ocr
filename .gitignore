@@ -44,3 +44,6 @@ example
 
 # klucze API
 .env
+
+#photos of receipts for testing
+receipts_input/

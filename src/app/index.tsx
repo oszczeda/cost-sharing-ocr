@@ -5,19 +5,26 @@ import LoadingScreen from "@/components/LoadingScreen";
 import NicknameForm from "@/components/NicknameForm";
 import OcrScanButton, { OcrResult } from "@/components/OCR-ScanButton";
 import { useUserProfile } from "@/hooks/use-user-profile";
+import { parseModeC_Keywords } from "@/utils/parseReceiptAmount";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-
+import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 export default function HomeScreen() {
   const { loading, userId, nickname, saveNickname } = useUserProfile();
 
   const [ocrResult, setOcrResult] = useState<OcrResult | null>(null);
+  const [receiptAmount, setReceiptAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
-
   const handleOcrResult = (result: OcrResult) => {
-    setError(null);
+    const parsed = parseModeC_Keywords(result.rawText);
+
     setOcrResult(result);
+    setReceiptAmount(parsed.amountFormatted?.replace(".", ",") ?? "");
+    setError(
+      parsed.found
+        ? null
+        : "Nie znaleziono sumy na paragonie. Wpisz kwotę ręcznie.",
+    );
   };
 
   if (loading) {
@@ -33,6 +40,18 @@ export default function HomeScreen() {
       <Text style={styles.title}>👋 Cześć, {nickname}!</Text>
       <Text style={styles.subtitle}>Twoje ID: {userId?.slice(0, 8)}...</Text>
 
+      <View style={styles.amountField}>
+        <Text>Kwota z paragonu (zł)</Text>
+        <TextInput
+          style={styles.amountInput}
+          accessibilityLabel="Kwota z paragonu w złotych"
+          value={receiptAmount}
+          onChangeText={setReceiptAmount}
+          keyboardType="decimal-pad"
+          placeholder="0,00"
+        />
+      </View>
+
       <OcrScanButton
         onResult={handleOcrResult}
         onError={(err: Error) => setError(err.message)}
@@ -40,6 +59,7 @@ export default function HomeScreen() {
       <CreateGroupButton />
       <JoinGroupButton />
       <InviteCodeButton />
+
       {error && (
         <View style={styles.errorBox}>
           <Text style={styles.errorText}>❌ Błąd: {error}</Text>
@@ -47,9 +67,14 @@ export default function HomeScreen() {
       )}
 
       {ocrResult && (
-        <ScrollView style={styles.resultBox} contentContainerStyle={styles.resultContent}>
+        <ScrollView
+          style={styles.resultBox}
+          contentContainerStyle={styles.resultContent}
+        >
           <Text style={styles.resultLabel}>✅ Wynik OCR:</Text>
-          <Text style={styles.resultText}>{ocrResult.rawText || "(brak tekstu)"}</Text>
+          <Text style={styles.resultText}>
+            {ocrResult.rawText || "(brak tekstu)"}
+          </Text>
         </ScrollView>
       )}
     </View>
@@ -57,6 +82,18 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+  amountField: {
+    width: "100%",
+    gap: 4,
+  },
+  amountInput: {
+    borderWidth: 1,
+    borderColor: "#888",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 18,
+  },
   container: {
     flex: 1,
     alignItems: "center",
