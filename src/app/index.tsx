@@ -5,6 +5,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import NicknameForm from "@/components/NicknameForm";
 import OcrScanButton, { OcrResult } from "@/components/OCR-ScanButton";
 import { useUserProfile } from "@/hooks/use-user-profile";
+<<<<<<< HEAD
 import { parseReceiptExpense, ParsedExpense } from "@/utils/receipt-parser";
 import { useState } from "react";
 import {
@@ -19,10 +20,16 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+=======
+import { parseModeC_Keywords } from "@/utils/parseReceiptAmount";
+import { useState } from "react";
+import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+>>>>>>> 40e2bac048e594be7cf438b1f946c8361bdc5fdc
 
 export default function HomeScreen() {
   const { loading, userId, nickname, saveNickname } = useUserProfile();
 
+<<<<<<< HEAD
   // Stan formularza wydatku
   const [expenseAmount, setExpenseAmount] = useState<string>("");
   const [expenseTitle, setExpenseTitle] = useState<string>("Zakupy - paragon");
@@ -39,9 +46,16 @@ export default function HomeScreen() {
    * Uruchamia Tryb C (Wyszukiwanie słów kluczowych: SUMA / TOTAL / RAZEM).
    * Jeśli nie znajdzie — użytkownik wprowadza kwotę ręcznie.
    */
+=======
+  const [ocrResult, setOcrResult] = useState<OcrResult | null>(null);
+  const [receiptAmount, setReceiptAmount] = useState("");
+  const [error, setError] = useState<string | null>(null);
+>>>>>>> 40e2bac048e594be7cf438b1f946c8361bdc5fdc
   const handleOcrResult = (result: OcrResult) => {
-    setError(null);
+    const parsed = parseModeC_Keywords(result.rawText);
+
     setOcrResult(result);
+<<<<<<< HEAD
     setParsedExpense(result.parsedExpense);
 
     if (result.parsedExpense?.found && result.parsedExpense.rawAmount) {
@@ -69,6 +83,14 @@ export default function HomeScreen() {
     setOcrResult(null);
     setParsedExpense(null);
     setError(null);
+=======
+    setReceiptAmount(parsed.amountFormatted?.replace(".", ",") ?? "");
+    setError(
+      parsed.found
+        ? null
+        : "Nie znaleziono sumy na paragonie. Wpisz kwotę ręcznie.",
+    );
+>>>>>>> 40e2bac048e594be7cf438b1f946c8361bdc5fdc
   };
 
   if (loading) {
@@ -97,6 +119,7 @@ export default function HomeScreen() {
             <Text style={styles.subtitle}>Twoje ID: {userId?.slice(0, 8)}...</Text>
           </View>
 
+<<<<<<< HEAD
           {/* ============================================================== */}
           {/* ZARZĄDZANIE GRUPAMI                                            */}
           {/* ============================================================== */}
@@ -254,6 +277,43 @@ export default function HomeScreen() {
               )}
             </View>
           )}
+=======
+      <View style={styles.amountField}>
+        <Text>Kwota z paragonu (zł)</Text>
+        <TextInput
+          style={styles.amountInput}
+          accessibilityLabel="Kwota z paragonu w złotych"
+          value={receiptAmount}
+          onChangeText={setReceiptAmount}
+          keyboardType="decimal-pad"
+          placeholder="0,00"
+        />
+      </View>
+
+      <OcrScanButton
+        onResult={handleOcrResult}
+        onError={(err: Error) => setError(err.message)}
+      />
+      <CreateGroupButton />
+      <JoinGroupButton />
+      <InviteCodeButton />
+
+      {error && (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>❌ Błąd: {error}</Text>
+        </View>
+      )}
+
+      {ocrResult && (
+        <ScrollView
+          style={styles.resultBox}
+          contentContainerStyle={styles.resultContent}
+        >
+          <Text style={styles.resultLabel}>✅ Wynik OCR:</Text>
+          <Text style={styles.resultText}>
+            {ocrResult.rawText || "(brak tekstu)"}
+          </Text>
+>>>>>>> 40e2bac048e594be7cf438b1f946c8361bdc5fdc
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -261,7 +321,23 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
+<<<<<<< HEAD
   safeArea: {
+=======
+  amountField: {
+    width: "100%",
+    gap: 4,
+  },
+  amountInput: {
+    borderWidth: 1,
+    borderColor: "#888",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 18,
+  },
+  container: {
+>>>>>>> 40e2bac048e594be7cf438b1f946c8361bdc5fdc
     flex: 1,
     backgroundColor: "#f7f7f9",
   },
